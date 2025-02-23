@@ -15,11 +15,10 @@ done
 
 echo -e "\nwait..."
 
-subfinder -d $domain -recursive -silent -o subs1.txt
-assetfinder -subs-only $domain >> subs1.txt
+subfinder -all -d $domain -recursive -silent -o subs1.txt
 echo "$domain" >> subs1.txt
-cat subs1.txt | sort -u > subs.txt
-httpx -l subs.txt -o "./subs-$dname.txt" -sc -silent -fhr -pa -vhost -H "$header"
+sort -u subs1.txt > subs.txt
+httpx -l subs.txt -o "./subs-$dname.txt" -sc -silent -fhr -pa -H "$header"
 rm subs.txt
 rm subs1.txt
 echo done

@@ -57,7 +57,7 @@ fi
 echo -e "\nthis could take a while...."
 
 x=0
-y=1
+y=0
 
 # Run through the number of assets for progress tracking
 
@@ -77,27 +77,49 @@ done
 
 for assetkey in $(jq -r '.[] | @base64' "$jsonfile"); do
 
-	assetname=$(echo "$assetkey" | base64 -d | jq -r '.Asset')
+        assetname=$(echo "$assetkey" | base64 -d | jq -r '.Asset')
 
-	if [[ "$assetname" =~ \  ]]; then
-		continue
-	fi
+        if [[ "$assetname" =~ \  ]]; then
+                continue
+        fi
 
-	domain="${assetname#*.}"
-	dname="${assetname#*.}"
-	dnamef="${dname%.*}"
+        adomain="${assetname#*\.}"
 
-	subfinder -d $domain -recursive -o subs1.txt > /dev/null 2>&1
-	assetfinder -subs-only $domain >> subs1.txt
-	echo "$domain" >> subs1.txt
-	cat subs1.txt | sort -u > subs.txt
-	httpx -l subs.txt -o "./subs-$dnamef.txt" -sc -fhr -pa -H "$header" > /dev/null 2>&1
-	rm subs.txt
-	rm subs1.txt
-	echo "[$y/$x] done"
-	((y++))
+        if [[ "$assetname" != *'*'* ]]; then
+                bdomain="$assetname"
+        fi
+
+        if [[ "$assetname" = *'*'* ]]; then
+                asubdomain="${assetname##*\*.}"
+                bsubdomain="${assetname%%\**}"
+        fi
+
+        echo "$adomain" >> manysubs-tmpfiles/subs1.txt
+        echo "$bdomain" >> manysubs-tmpfiles/subs1.txt
+
+        echo "$asubdomain" >> manysubs-tmpfiles/subs2.txt
+        echo "$bsubdomain" >> manysubs-tmpfiles/subs3.txt
 
 done
 
-find ./subs* -type f -exec cat {} \; > ./all.txt
-sort -u all.txt > all.txt
+echo "task [1/4] done"
+
+subfinder -all -dL manysubs-tmpfiles/subs1.txt -recursive -o manysubs-tmpfiles/subs1-done.txt > /dev/null 2>&1
+
+echo "task [2/4] done"
+
+subfinder -all -dL manysubs-tmpfiles/subs2.txt -recursive -o manysubs-tmpfiles/subs2-done.txt > /dev/null 2>&1
+
+echo "task [3/4] done"
+
+grep -Ff manysubs-tmpfiles/subs3.txt manysubs-tmpfiles/subs2-done.txt > manysubs-tmpfiles/subs3-done.txt
+cat manysubs-tmpfiles/subs1-done.txt manysubs-tmpfiles/subs3-done.txt | sort -u > manysubs-tmpfiles/tmpsubdomains.txt
+
+httpx -l manysubs-tmpfiles/tmpsubdomains.txt -o subdomains.txt -sc -fhr -pa -H "$header" > /dev/null 2>&1
+
+sort subdomains.txt -o subdomains.txt
+
+rm -rf manysubs-tmpfiles/
+
+echo "task [4/4] done"
+echo "complete"
