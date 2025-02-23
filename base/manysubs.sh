@@ -9,8 +9,8 @@ jsonfile=$(ls *.json | head -n 1)
 
 jq 'if type == "array" then empty else error("json file must contain a valid array") end' $jsonfile
 
-echo "you can filter for the max severity bounty the program offers"
-echo "only domains that are eligible for your chosen severity will be selected"
+echo "you can filter for the severity that the program offers"
+echo "only domains that are eligible for your chosen severity will be selected (>=selected)"
 
 # Functionality for interactive selection
 # Each option will include domains in its category and above
@@ -100,7 +100,7 @@ echo "task [3/4] done"
 grep -Ff manysubs-tmpfiles/subs3.txt manysubs-tmpfiles/subs2-done.txt > manysubs-tmpfiles/subs3-done.txt
 cat manysubs-tmpfiles/subs1-done.txt manysubs-tmpfiles/subs3-done.txt | sort -u > manysubs-tmpfiles/tmpsubdomains.txt
 
-httpx -l manysubs-tmpfiles/tmpsubdomains.txt -o subdomains.txt -sc -fhr -pa -H "$header" > /dev/null 2>&1
+httpx -l manysubs-tmpfiles/tmpsubdomains.txt -o subdomains.txt -sc -fhr -H "$header" > /dev/null 2>&1
 
 sort subdomains.txt -o subdomains.txt
 
