@@ -56,24 +56,9 @@ fi
 
 echo -e "\nthis could take a while...."
 
-x=0
-y=0
-
-# Run through the number of assets for progress tracking
-
-for assetkey in $(jq -r '.[] | @base64' "$jsonfile"); do
-
-        assetname=$(echo "$assetkey" | base64 -d | jq -r '.Asset')
-
-        if [[ "$assetname" =~ \  ]]; then
-                continue
-        fi
-
-	((x++))
-
-done
-
 # Enumerate subdomains and write the results to files
+
+mkdir manysubs-tmpfiles
 
 for assetkey in $(jq -r '.[] | @base64' "$jsonfile"); do
 
