@@ -99,4 +99,5 @@ for assetkey in $(jq -r '.[] | @base64' "$jsonfile"); do
 
 done
 
-find ./subs* -type f -exec cat {} + | sort -u \; > ./all.txt
+find ./subs* -type f -exec cat {} \; > ./all.txt
+sort -u all.txt > all.txt
