@@ -8,6 +8,7 @@ for file in *; do
 		if [ $? -eq 0 ]; then
 			echo "copied $file to bin"
 		else
+			echo "failed to copy $file"
 			((x++))
 		fi
 	fi
