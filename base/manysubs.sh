@@ -87,11 +87,11 @@ for assetkey in $(jq -r '.[] | @base64' "$jsonfile"); do
 	dname="${assetname#*.}"
 	dnamef="${dname%.*}"
 
-	subfinder -d $domain -recursive -silent -o subs1.txt > /dev/null 2>&1
+	subfinder -d $domain -recursive -o subs1.txt > /dev/null 2>&1
 	assetfinder -subs-only $domain >> subs1.txt
 	echo "$domain" >> subs1.txt
 	cat subs1.txt | sort -u > subs.txt
-	httpx -l subs.txt -o "./subs-$dnamef.txt" -sc -fhr -pa -vhost -H "$header" > /dev/null 2>&1
+	httpx -l subs.txt -o "./subs-$dnamef.txt" -sc -fhr -pa -H "$header" > /dev/null 2>&1
 	rm subs.txt
 	rm subs1.txt
 	echo "[$y/$x] done"
@@ -99,4 +99,4 @@ for assetkey in $(jq -r '.[] | @base64' "$jsonfile"); do
 
 done
 
-find ./subs* -type f -exec cat {} \; > ./all.txt
+find ./subs* -type f -exec cat {} + | sort -u \; > ./all.txt
