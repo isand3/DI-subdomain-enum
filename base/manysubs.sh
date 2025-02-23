@@ -89,11 +89,11 @@ done
 
 echo "task [1/4] done"
 
-subfinder -all -dL manysubs-tmpfiles/subs1.txt -recursive -o manysubs-tmpfiles/subs1-done.txt > /dev/null 2>&1
+subfinder -dL manysubs-tmpfiles/subs1.txt -recursive -o manysubs-tmpfiles/subs1-done.txt > /dev/null 2>&1
 
 echo "task [2/4] done"
 
-subfinder -all -dL manysubs-tmpfiles/subs2.txt -recursive -o manysubs-tmpfiles/subs2-done.txt > /dev/null 2>&1
+subfinder -dL manysubs-tmpfiles/subs2.txt -recursive -o manysubs-tmpfiles/subs2-done.txt > /dev/null 2>&1
 
 echo "task [3/4] done"
 
