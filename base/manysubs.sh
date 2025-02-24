@@ -80,7 +80,7 @@ for assetkey in $(jq -r '.[] | @base64' "$jsonfile"); do
         fi
 
         echo "$adomain" >> manysubs-tmpfiles/subs1.txt
-        echo "$bdomain" >> manysubs-tmpfiles/subs1.txt
+        echo "$bdomain" >> manysubs-tmpfiles/subs1-1.txt
 
         echo "$asubdomain" >> manysubs-tmpfiles/subs2.txt
         echo "$bsubdomain" >> manysubs-tmpfiles/subs3.txt
@@ -98,7 +98,7 @@ subfinder -dL manysubs-tmpfiles/subs2.txt -recursive -o manysubs-tmpfiles/subs2-
 echo "task [3/4] done"
 
 grep -Ff manysubs-tmpfiles/subs3.txt manysubs-tmpfiles/subs2-done.txt > manysubs-tmpfiles/subs3-done.txt
-cat manysubs-tmpfiles/subs1-done.txt manysubs-tmpfiles/subs3-done.txt | sort -u > manysubs-tmpfiles/tmpsubdomains.txt
+cat manysubs-tmpfiles/subs1-done.txt manysubs-tmpfiles/subs3-done.txt manysubs-tmpfiles/subs1-1.txt | sort -u > manysubs-tmpfiles/tmpsubdomains.txt
 
 httpx -l manysubs-tmpfiles/tmpsubdomains.txt -o subdomains.txt -sc -fhr -H "$header" > /dev/null 2>&1
 
