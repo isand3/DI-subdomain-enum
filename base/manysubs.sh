@@ -27,23 +27,23 @@ select opt in "${options[@]}"; do
 	case $opt in
 		"All")
 			echo "All severity levels chosen"
-			jq -r '[.[] | select(.Coverage == "In Scope")]' $jsonfile > "modified-$jsonfile"
+			jq -r '[.[] | select(.Severity != "None")]' $jsonfile > "modified-$jsonfile"
 			break
 			;;
 		"Low")
-			jq -r '[.[] | select(.Severity != "Informational" and .Coverage == "In Scope")]' $jsonfile > "modified-$jsonfile"
+			jq -r '[.[] | select(.Severity != "Informational" and .Severity != "None")]' $jsonfile > "modified-$jsonfile"
 			break
 			;;
 		"Medium")
-			jq -r '[.[] | select(.Severity != "Informational" and .Severity != "Low" and .Coverage == "In Scope")]' $jsonfile > "modified-$jsonfile"
+			jq -r '[.[] | select(.Severity != "Informational" and .Severity != "Low" and .Severity != "None")]' $jsonfile > "modified-$jsonfile"
 			break
 			;;
 		"High")
-			jq -r '[.[] | select(.Severity == "High" or .Severity == "Critical") and .Coverage == "In Scope"]' $jsonfile > "modified-$jsonfile"
+			jq -r '[.[] | select(.Severity == "High" or .Severity == "Critical")]' $jsonfile > "modified-$jsonfile"
 			break
 			;;
 		"Critical")
-			jq -r '[.[] | select(.Severity == "Critical" and .Coverage == "In Scope")]' $jsonfile > "modified-$jsonfile"
+			jq -r '[.[] | select(.Severity == "Critical")]' $jsonfile > "modified-$jsonfile"
 			break
 			;;
 		*)
