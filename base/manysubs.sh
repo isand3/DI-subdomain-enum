@@ -1,6 +1,6 @@
 #!/bin/bash
 
-jsonfile=$(ls *.json | head -n 1)
+jsonfile=$(find . -name "*.json" | head -n 1)
 
 # Checks if file exists
 
