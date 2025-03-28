@@ -110,7 +110,7 @@ done
 
 echo "[2/2] done"
 
-cat subs-tmp.txt tmp2-manysubs.txt > subs.txt
+cat subs-tmp.txt tmp2-manysubs.txt | sed 's/\*\.\(.*\)/\1/' > subs.txt
 rm ./subs-tmp.txt ./tmp2-manysubs.txt ./tmp1-manysubs.txt
 sort -u subs.txt -o subs.txt
 echo "enumeration complete"
