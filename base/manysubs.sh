@@ -4,7 +4,7 @@ jsonfile=$(find . -name "*.json" | head -n 1)
 
 # Checks if file exists
 
-if [ -f "*.json" ]; then
+if [ -f "$jsonfile" ]; then
         echo "using $jsonfile"
 else
         echo "no json file found"
