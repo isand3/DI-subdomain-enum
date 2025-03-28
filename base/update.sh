@@ -3,7 +3,7 @@
 x=0
 
 for file in *; do
-	if [ -f $file ] && [[ "$file" != "update.sh" && "$file" == *.sh ]]; then
+	if [ -f $file ] && [[ "$file" == *.sh ]]; then
 		cp  $file $home/bin
 		if [ $? -eq 0 ]; then
 			echo "copied $file to bin"
