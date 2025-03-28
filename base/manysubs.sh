@@ -59,8 +59,8 @@ echo -e "\nthis could take a while...."
 # Enumerate subdomains and write the results to files
 
 ipv4_regexp='^([0-9]{1,3}\.){3}[0-9]{1,3}(/([0-9]|[12][0-9]|3[0-2]))?$'
-touch tmp2-manysubs.txt
-touch tmp1-manysubs.txt
+touch ./tmp2-manysubs.txt
+touch ./tmp1-manysubs.txt
 
 for assetkey in $(jq -r '.[] | @base64' "$jsonfile"); do
 
@@ -85,12 +85,12 @@ for assetkey in $(jq -r '.[] | @base64' "$jsonfile"); do
 # Checks if isolated asset (subdomains not in scope), add to list for no enumeration
 
 	if [[ ! "$assetname" =~ "*." ]]; then
-		echo "$assetname" >> tmp2-manysubs.txt
+		echo "$assetname" >> ./tmp2-manysubs.txt
 		continue
 	fi
 #
 
-echo "$assetname" | sed 's/\*\.\(.*\)/\1/' >> tmp1-manysubs.txt
+echo "$assetname" | sed 's/\*\.\(.*\)/\1/' >> ./tmp1-manysubs.txt
 
 done
 
@@ -99,20 +99,20 @@ done
 
 echo "[1/2] enumerating with subfinder..."
 
-subfinder -dL tmp1-manysubs.txt -recursive -o subs-tmp.txt > /dev/null 2>&1
+subfinder -dL ./tmp1-manysubs.txt -recursive -o ./subs-tmp.txt > /dev/null 2>&1
 
 echo "[1/2] done"
 echo "[2/2] enumerating with assetfinder..."
 
-for line in $(cat tmp1-manysubs.txt); do
-	assetfinder -subs-only "$line" >> subs-tmp.txt
+for line in $(cat ./tmp1-manysubs.txt); do
+	assetfinder -subs-only "$line" >> ./subs-tmp.txt
 
 done
 
 echo "[2/2] done"
 
 cat subs-tmp.txt tmp2-manysubs.txt > subs.txt
-rm subs-tmp.txt tmp2-manysubs.txt tmp1-manysubs.txt
+rm ./subs-tmp.txt ./tmp2-manysubs.txt ./tmp1-manysubs.txt
 sort -u subs.txt -o subs.txt
 echo "enumeration complete"
 
