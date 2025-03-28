@@ -1,8 +1,5 @@
 #!/bin/bash
 
-echo "enter http header to use, type nothing if none"
-read header
-
 # Uses first .json file ls finds
 
 jsonfile=$(ls *.json | head -n 1)
@@ -21,22 +18,23 @@ select opt in "${options[@]}"; do
 	case $opt in
 		"All")
 			echo "All severity levels chosen"
+			jq -r '[.[] | select(.Coverage == "In Scope")]' $jsonfile > "$jsonfile"
 			break
 			;;
 		"Low")
-			jq -r '[.[] | select(.Severity != "Informational")]' $jsonfile > "$jsonfile"
+			jq -r '[.[] | select(.Severity != "Informational" and .Coverage == "In Scope")]' $jsonfile > "$jsonfile"
 			break
 			;;
 		"Medium")
-			jq -r '[.[] | select(.Severity != "Informational" and .Severity != "Low")]' $jsonfile > "$jsonfile"
+			jq -r '[.[] | select(.Severity != "Informational" and .Severity != "Low" and .Coverage == "In Scope")]' $jsonfile > "$jsonfile"
 			break
 			;;
 		"High")
-			jq -r '[.[] | select(.Severity == "High" or .Severity == "Critical")]' $jsonfile > "$jsonfile"
+			jq -r '[.[] | select(.Severity == "High" or .Severity == "Critical") and .Coverage == "In Scope"]' $jsonfile > "$jsonfile"
 			break
 			;;
 		"Critical")
-			jq -r '[.[] | select(.Severity == "Critical")]' $jsonfile > "$jsonfile"
+			jq -r '[.[] | select(.Severity == "Critical" and .Coverage == "In Scope")]' $jsonfile > "$jsonfile"
 			break
 			;;
 		*)
@@ -54,59 +52,66 @@ else
 	exit 1
 fi
 
+#
+
 echo -e "\nthis could take a while...."
 
 # Enumerate subdomains and write the results to files
 
-mkdir manysubs-tmpfiles
+ipv4_regexp='^([0-9]{1,3}\.){3}[0-9]{1,3}(/([0-9]|[12][0-9]|3[0-2]))?$'
 
 for assetkey in $(jq -r '.[] | @base64' "$jsonfile"); do
 
         assetname=$(echo "$assetkey" | base64 -d | jq -r '.Asset')
+#
+
+# Skip anything with spaces
 
         if [[ "$assetname" =~ \  ]]; then
                 continue
         fi
+#
 
-        adomain="${assetname#*\.}"
+# Checks if ipv4 address, adds to list for no enumeration
 
-        if [[ "$assetname" != *'*'* ]]; then
-                bdomain="$assetname"
-        fi
+	if [[ "$assetname" =~ $ipv4_regexp  ]]; then
+		echo "$assetname" >> tmp2-manysubs.txt
+		continue
+	fi
+#
 
-        if [[ "$assetname" = *'*'* ]]; then
-                asubdomain="${assetname##*\*.}"
-                bsubdomain="${assetname%%\**}"
-        fi
+# Checks if isolated asset (subdomains not in scope), add to list for no enumeration
 
-        echo "$adomain" >> manysubs-tmpfiles/subs1.txt
-        echo "$bdomain" >> manysubs-tmpfiles/subs1-1.txt
+	if [[ ! "$assetname" =~ "*." ]]; then
+		echo "$assetname" >> tmp2-manysubs.txt
+		continue
+	fi
+#
 
-        echo "$asubdomain" >> manysubs-tmpfiles/subs2.txt
-        echo "$bsubdomain" >> manysubs-tmpfiles/subs3.txt
+echo "$assetname" | sed 's/\*\.\(.*\)/\1/' >> tmp1-manysubs.txt
 
 done
 
-echo "starting to enumerate..."
 
-subfinder -dL manysubs-tmpfiles/subs1.txt -recursive -o manysubs-tmpfiles/subs1-done.txt > /dev/null 2>&1
+# Enumerate subdomains
 
-echo "task [1/3] done"
+echo "[1/2] enumerating with subfinder..."
 
-subfinder -dL manysubs-tmpfiles/subs2.txt -recursive -o manysubs-tmpfiles/subs2-done.txt > /dev/null 2>&1
+subfinder -dL tmp1-manysubs.txt -recursive -o subs-tmp.txt > /dev/null 2>&1
 
-echo "task [2/3] done"
+echo "[1/2] done"
+echo "[2/2] enumerating with assetfinder..."
 
-grep -Ff manysubs-tmpfiles/subs3.txt manysubs-tmpfiles/subs2-done.txt > manysubs-tmpfiles/subs3-done.txt
-cat manysubs-tmpfiles/subs1-done.txt manysubs-tmpfiles/subs3-done.txt manysubs-tmpfiles/subs1-1.txt manysubs-tmpfiles/subs1.txt | sort -u > manysubs-tmpfiles/tmpsubdomains.txt
+for line in $(cat tmp1-manysubs.txt); do
+	assetfinder -subs-only "$line" >> subs-tmp.txt
 
-echo "validating with httpx..."
+done
 
-httpx -l manysubs-tmpfiles/tmpsubdomains.txt -o subdomains.txt -sc -fhr -H "$header" > /dev/null 2>&1
+echo "[2/2] done"
 
-sort subdomains.txt -o subdomains.txt
+cat subs-tmp.txt tmp2-manysubs.txt > subs.txt
+rm subs-tmp.txt tmp2-manysubs.txt tmp1-manysubs.txt
+sort -u subs.txt -o subs.txt
+echo "enumeration complete"
 
-rm -rf manysubs-tmpfiles/
-
-echo "task [3/3] done"
-echo "complete"
+#
