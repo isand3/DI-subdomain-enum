@@ -59,6 +59,8 @@ echo -e "\nthis could take a while...."
 # Enumerate subdomains and write the results to files
 
 ipv4_regexp='^([0-9]{1,3}\.){3}[0-9]{1,3}(/([0-9]|[12][0-9]|3[0-2]))?$'
+touch tmp2-manysubs.txt
+touch tmp1-manysubs.txt
 
 for assetkey in $(jq -r '.[] | @base64' "$jsonfile"); do
 
@@ -75,7 +77,7 @@ for assetkey in $(jq -r '.[] | @base64' "$jsonfile"); do
 # Checks if ipv4 address, adds to list for no enumeration
 
 	if [[ "$assetname" =~ $ipv4_regexp  ]]; then
-		echo "$assetname" >> tmp2-manysubs.txt
+		echo "$assetname" >> ./tmp2-manysubs.txt
 		continue
 	fi
 #
