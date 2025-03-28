@@ -1,8 +1,17 @@
 #!/bin/bash
 
-# Uses first .json file ls finds
-
 jsonfile=$(ls *.json | head -n 1)
+
+# Checks if file exists
+
+if [ -f "*.json" ]; then
+        echo "using $jsonfile"
+else
+        echo "no json file found"
+        exit 1
+fi
+
+#
 
 jq 'if type == "array" then empty else error("json file must contain a valid array") end' $jsonfile
 
@@ -18,23 +27,23 @@ select opt in "${options[@]}"; do
 	case $opt in
 		"All")
 			echo "All severity levels chosen"
-			jq -r '[.[] | select(.Coverage == "In Scope")]' $jsonfile > "$jsonfile"
+			jq -r '[.[] | select(.Coverage == "In Scope")]' $jsonfile > "modified-$jsonfile"
 			break
 			;;
 		"Low")
-			jq -r '[.[] | select(.Severity != "Informational" and .Coverage == "In Scope")]' $jsonfile > "$jsonfile"
+			jq -r '[.[] | select(.Severity != "Informational" and .Coverage == "In Scope")]' $jsonfile > "modified-$jsonfile"
 			break
 			;;
 		"Medium")
-			jq -r '[.[] | select(.Severity != "Informational" and .Severity != "Low" and .Coverage == "In Scope")]' $jsonfile > "$jsonfile"
+			jq -r '[.[] | select(.Severity != "Informational" and .Severity != "Low" and .Coverage == "In Scope")]' $jsonfile > "modified-$jsonfile"
 			break
 			;;
 		"High")
-			jq -r '[.[] | select(.Severity == "High" or .Severity == "Critical") and .Coverage == "In Scope"]' $jsonfile > "$jsonfile"
+			jq -r '[.[] | select(.Severity == "High" or .Severity == "Critical") and .Coverage == "In Scope"]' $jsonfile > "modified-$jsonfile"
 			break
 			;;
 		"Critical")
-			jq -r '[.[] | select(.Severity == "Critical" and .Coverage == "In Scope")]' $jsonfile > "$jsonfile"
+			jq -r '[.[] | select(.Severity == "Critical" and .Coverage == "In Scope")]' $jsonfile > "modified-$jsonfile"
 			break
 			;;
 		*)
@@ -42,17 +51,6 @@ select opt in "${options[@]}"; do
 			;;
 	esac
 done
-
-# Checks if file exists
-
-if [ -f $jsonfile ]; then
-	echo "using $jsonfile"
-else
-	echo "no json file found"
-	exit 1
-fi
-
-#
 
 echo -e "\nthis could take a while...."
 
@@ -62,7 +60,7 @@ ipv4_regexp='^([0-9]{1,3}\.){3}[0-9]{1,3}(/([0-9]|[12][0-9]|3[0-2]))?$'
 touch ./tmp2-manysubs.txt
 touch ./tmp1-manysubs.txt
 
-for assetkey in $(jq -r '.[] | @base64' "$jsonfile"); do
+for assetkey in $(jq -r '.[] | @base64' "modified-$jsonfile"); do
 
         assetname=$(echo "$assetkey" | base64 -d | jq -r '.Asset')
 #
