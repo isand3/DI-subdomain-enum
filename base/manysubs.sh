@@ -76,6 +76,7 @@ for assetkey in $(jq -r '.[] | @base64' "modified-$jsonfile"); do
 
 	if [[ "$assetname" =~ $ipv4_regexp  ]]; then
 		echo "$assetname" >> ./tmp2-manysubs.txt
+		echo "$assetname" >> ./ip-list.txt
 		continue
 	fi
 #
