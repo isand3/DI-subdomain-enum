@@ -1,6 +1,6 @@
 #!/bin/bash
 
-jsonfile=$(find . -name "*.json" | head -n 1)
+jsonfile=$(find . -name "*.json" | head -n 1 | sed 's|^./||')
 
 # Checks if file exists
 
