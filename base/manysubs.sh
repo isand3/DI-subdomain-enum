@@ -116,3 +116,57 @@ sort -u subs.txt -o subs.txt
 echo "enumeration complete"
 
 #
+
+nmap -sn -iL subs.txt -v 0 -oN online-subs.txt >/dev/null
+
+# Extract ip addresses
+
+awk '{
+  while (match($0, /\b([0-9]{1,3}\.){3}[0-9]{1,3}\b/)) {
+    ip = substr($0, RSTART, RLENGTH);
+    split(ip, o, ".");
+    if (o[1] <= 255 && o[2] <= 255 && o[3] <= 255 && o[4] <= 255)
+      print ip;
+    $0 = substr($0, RSTART + RLENGTH);
+  }
+}' online-subs.txt | sort -u > online-ips.txt
+
+#
+
+# Nmap scan function
+
+echo -n "scan all hosts up for ports? (y/n): "
+echo
+
+while true; do
+    read -n 1 -s key
+    if [ "$key" == "y" ]; then
+        nmap_scan
+        break
+    elif [ "$key" == "n" ]; then
+        break
+    else
+        echo "press y or n"
+	echo
+    fi
+done
+
+function nmap_scan () {
+
+echo "1 for standard scan, 2 for 65535"
+while true; do
+	read -n 1 -s key2
+	if [ $key2 -eq 1 ]; then
+		nmap -iL online-ips.txt -oN nmap-standard.txt
+		break
+	elif [ $key2 -eq 2 ]; then
+		nmap -iL -p- online-ips.txt -oN nmap-65535.txt
+		break
+	else
+		echo "press 1 or 2"
+		echo
+	fi
+done
+}
+
+#

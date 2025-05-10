@@ -9,7 +9,7 @@ Enumerates subdomains for every domain (asset) in the JSON file from Defend Icel
 It will supply the current directory with a txt file containing all subdomains found.
 
 # update.sh
-Copies everything in `/base` to bin (for future proofing)
+Copies scripts in `./DI-subdomain-enum/base` to `/bin` (for future proofing)
 
 # Dependencies
 Requires: `jq`, `subfinder`, `assetfinder`
