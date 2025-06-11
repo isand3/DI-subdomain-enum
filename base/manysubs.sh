@@ -135,22 +135,6 @@ awk '{
 
 # Nmap scan function
 
-echo -n "scan all hosts up for ports? (y/n): "
-echo
-
-while true; do
-    read -n 1 -s key
-    if [ "$key" == "y" ]; then
-        nmap_scan
-        break
-    elif [ "$key" == "n" ]; then
-        break
-    else
-        echo "press y or n"
-	echo
-    fi
-done
-
 function nmap_scan () {
 
 echo "1 for standard scan, 2 for 65535"
@@ -168,5 +152,21 @@ while true; do
 	fi
 done
 }
+
+echo -n "scan all hosts up for ports? (y/n): "
+echo
+
+while true; do
+    read -n 1 -s key
+    if [ "$key" == "y" ]; then
+        nmap_scan
+        break
+    elif [ "$key" == "n" ]; then
+        break
+    else
+        echo "press y or n"
+	echo
+    fi
+done
 
 #
